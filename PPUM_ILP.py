@@ -278,7 +278,7 @@ class PPUM_ILP:
         model += sum_temp
 
         # Solve the optimization problem
-        model.solve( PULP_CBC_CMD(logPath=r'log.txt', msg=False))
+        model.solve( PULP_CBC_CMD(msg=False))
         dict_variables = {}
         for var in model.variables():
             new_dict = {}
@@ -319,7 +319,7 @@ class PPUM_ILP:
 
 if __name__ == "__main__":
     delta = 0.28
-    file_name = 'input/test.txt'
+    file_name = 'input/chess_test.txt'
     start = time.time()
     print("\nĐang đọc file test.txt")
     data_chess, sum_util, data_util, item_list = load_dataset_util(file_name)
