@@ -16,7 +16,6 @@ class PPUM_ILP:
             SHI_TB:
         """
         self.min_utility = min_utility
-        self.D_ = []
         self.Is = Is
         # self.Is = [[1, 2], [1, 3], [1, 4]]
         self.HUI = HUI
@@ -64,6 +63,7 @@ class PPUM_ILP:
                     # for nhi_item in self.NHI_TB:
                     NHI_TB.append(hui_item)
         return NHI_TB, SHI_TB
+
 
     def get_tid(self, elements):
         result = []
@@ -157,7 +157,6 @@ class PPUM_ILP:
         for item in item_list:
             array_util = []
             for i in range(len(data_chess)):
-
                 try:
                     index = data_chess[i].index(int(item))
                 except:
@@ -319,21 +318,23 @@ class PPUM_ILP:
 
 if __name__ == "__main__":
     delta = 0.28
-    file_name = 'input/chess_test.txt'
+    Is = [[1, 4],[1, 2]]
+
+    file_name = 'input/test.txt'
     start = time.time()
     print("\nĐang đọc file test.txt")
     data_chess, sum_util, data_util, item_list = load_dataset_util(file_name)
     min_utility = sum(sum_util) * delta
     print("Đọc file xong. \nKhai thác hui với min utility bằng", min_utility)
 
-    hui_miner = AlgoHUIMiner(min_utility)
+    hui_miner = AlgoHUIMiner(80)
     hui = hui_miner.run_algorithm(data_chess, sum_util, data_util)
     print('Khai thác xong với tổng thời gian khai thác HUI (HUI Miner): %s giây' % (time.time() - start))
     print("\n-----------------\n")
     start2 = time.time()
-    Is = [[1, 2]]
+    
     print("Sử dụng thuật toán PPUM_ILP để ẩn tập nhạy cảm: ", Is)
-    PPUM_ILP(hui, min_utility, data_chess, item_list, sum_util, data_util, Is).run()
+    PPUM_ILP(hui, 80, data_chess, item_list, sum_util, data_util, Is).run()
 
     print('Tổng thời gian: %s giây' % (time.time() - start2))
 
