@@ -319,7 +319,7 @@ class PPUM_ILP:
 
 if __name__ == "__main__":
     delta = 0.28
-    file_name = 'input/chess_test.txt'
+    file_name = 'input/test.txt'
     start = time.time()
     print("\nĐang đọc file test.txt")
     data_chess, sum_util, data_util, item_list = load_dataset_util(file_name)
