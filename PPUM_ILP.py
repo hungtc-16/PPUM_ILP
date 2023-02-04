@@ -17,7 +17,6 @@ class PPUM_ILP:
         """
         self.min_utility = min_utility
         self.Is = Is
-        # self.Is = [[1, 2], [1, 3], [1, 4]]
         self.HUI = HUI
         self.data_chess = data_chess
         self.item_list = item_list
@@ -63,7 +62,6 @@ class PPUM_ILP:
                     # for nhi_item in self.NHI_TB:
                     NHI_TB.append(hui_item)
         return NHI_TB, SHI_TB
-
 
     def get_tid(self, elements):
         result = []
@@ -146,6 +144,7 @@ class PPUM_ILP:
                     if i == j and TIDs[item][j] != 0:
                         arr.append(i + 1)
         return arr
+
     @staticmethod
     def my_print(u):
         for item in u:
@@ -277,7 +276,7 @@ class PPUM_ILP:
         model += sum_temp
 
         # Solve the optimization problem
-        model.solve( PULP_CBC_CMD(msg=False))
+        model.solve(PULP_CBC_CMD(msg=False))
         dict_variables = {}
         for var in model.variables():
             new_dict = {}
@@ -306,19 +305,32 @@ class PPUM_ILP:
             lable = int(item.split("_")[0])
             tid = int(item.split("_")[1])
             value = dict_variables[item]
-            db[tid-1][lable-1] = value
+            db[tid - 1][lable - 1] = value
 
         # convert to date String
         file_name = "output/perturbed-database-{}.csv"
         np.savetxt(file_name.format(now.strftime("%d%m%Y")), db, fmt='%d', delimiter=",")
         print("Done!")
+
     def run(self):
         self.algorithm()
 
 
+def check_Is_in_HUI(HUI, Is):
+    count = 0
+    for item in HUI:
+        for i in Is:
+
+            if item.item == i:
+                count += 1
+                break
+    return count
+
+
 if __name__ == "__main__":
     delta = 0.28
-    Is = [[1, 4],[1, 2]]
+    Is = [[1, 2]]
+    # Is = [[1, 2], [1, 3], [1, 4]]
 
     file_name = 'input/test.txt'
     start = time.time()
@@ -331,10 +343,15 @@ if __name__ == "__main__":
     hui = hui_miner.run_algorithm(data_chess, sum_util, data_util)
     print('Khai thác xong với tổng thời gian khai thác HUI (HUI Miner): %s giây' % (time.time() - start))
     print("\n-----------------\n")
+
+    # Kiểm tra Is có trong HUI hay không
+    if check_Is_in_HUI(hui, Is) != len(Is):
+        print("Tập Is không thuộc HUI")
+        exit()
+
     start2 = time.time()
-    
+
     print("Sử dụng thuật toán PPUM_ILP để ẩn tập nhạy cảm: ", Is)
     PPUM_ILP(hui, 80, data_chess, item_list, sum_util, data_util, Is).run()
 
     print('Tổng thời gian: %s giây' % (time.time() - start2))
-
