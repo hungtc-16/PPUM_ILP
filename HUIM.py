@@ -1,6 +1,6 @@
 from common import UtilityList, Element, Pair
 
-
+import sys
 def sort_transaction(pair):
     return pair.item
 
@@ -14,9 +14,15 @@ class AlgoHUIMiner:
         self.join_count = 0
         self.min_utility = min_utility
         self.EUCS = {}
+        self.itemset_buffer = []
+        self.itemset_buffer_size = 200
+        self.hui_result = []
 
     def run_algorithm(self, data_chess, tran_util, data_util):
         # Get TWU
+
+        self.itemset_buffer = [0] * self.itemset_buffer_size
+
         for i, row in enumerate(data_chess):
             transaction_utility = tran_util[i]
             for j, item in enumerate(row):
@@ -37,12 +43,12 @@ class AlgoHUIMiner:
         for item in self.map_item_to_TWU.keys():
             if self.map_item_to_TWU[item] > self.min_utility:
                 uList = UtilityList()
-                uList.set_item(item)
+                uList.set_item([item])
                 map_item_to_utility_list.update({item: uList})
                 list_of_utility_lists.append(uList)
 
         # SORT THE LIST OF HIGH TWU ITEMS IN ASCENDING ORDER
-        list_of_utility_lists.sort(reverse=False, key=sort_transaction)
+        list_of_utility_lists.sort(key=lambda ul: self.map_item_to_TWU[ul.item[0]])
 
         for tid, item in enumerate(data_chess, start=1):
             remaining_utility = 0
@@ -56,7 +62,7 @@ class AlgoHUIMiner:
                     revised_transaction.append(pair)
                     remaining_utility += pair.utility
 
-            revised_transaction.sort(reverse=True, key=sort_transaction)
+            revised_transaction.sort(key=lambda p: self.map_item_to_TWU[p.item])
 
             for i in range(len(revised_transaction)):
                 pair = revised_transaction[i]
@@ -66,7 +72,6 @@ class AlgoHUIMiner:
                 utility_list_of_item.add_element(element)
                 # populate EUCS
                 for j in range(i + 1, len(revised_transaction)):
-
                     item = revised_transaction[i].item
                     next_item = revised_transaction[j].item
                     if item in self.EUCS:
@@ -76,50 +81,37 @@ class AlgoHUIMiner:
                             self.EUCS[item][next_item] = transac_util
                     else:
                         self.EUCS[item] = {next_item: transac_util}
-            # for pair in revised_transaction:
-            #     remaining_utility = remaining_utility - pair.utility
-            #     utility_list_of_item = map_item_to_utility_list[pair.item]
-            #     element = Element(tid, pair.utility, remaining_utility)
-            #     utility_list_of_item.add_element(element)
-        
-        # for i in list_of_utility_lists:
-        #     print("item",i.item)
-        # Mine the database recursively
-        hui_result = []
-        self.hui_miner(None, list_of_utility_lists, self.min_utility, 0)
-        # for item in hui_result:
-        #     item.to_str()
-        return hui_result
 
-    def hui_miner(self, pUL, ULs, min_utility, prefix_len):
+        # Mine the database recursively
+        self.hui_miner(None, list_of_utility_lists,  0)
+        # print(self.hui_result)
+        return self.hui_result
+
+    def hui_miner(self, pUL, ULs,  prefix_len):
         for i in range(len(ULs)):
             X = ULs[i]
             # if pX is a high utility itemset.
             # we save the itemset: px
-            if X.sum_iutils >= min_utility:
+            # print(X.sum_iutils)
+            if X.sum_iutils >= self.min_utility:
                 # save to file
-                # hui_result.append(X)
-                self.output(prefix_len, X.item, X.sum_iutils)
-            if (X.sum_iutils + X.sum_rutils) >= min_utility:
-               
+                print(X.item)
+                self.hui_result.append(X)
+                # self.output(prefix_len, X.item, X.sum_iutils)
+            if X.sum_iutils + X.sum_rutils >= self.min_utility:
                 exULs = []
                 for j in range(i + 1, len(ULs)):
                     Y = ULs[j]
-                    print(self.EUCS[X.item], Y.item)
-                    if (X.item in self.EUCS and Y.item in self.EUCS[X.item]):
-                        # condition to explore extensions of prefix U {x, y}
-                        print("self.EUCS[X.item][Y.item]")
-                        if self.EUCS[X.item][Y.item] >= min_utility:
-                            # construct utility list for the itemset prefix U {x, y}
-                            # and append it to the utility lists for the extensions of prefix U {x}
-                            exULs.append(self.construct(pUL, X, Y))
+                    # if X.item in self.EUCS and Y.item in self.EUCS[X.item]:
+                    #     if self.EUCS[X.item][Y.item] >= self.min_utility:
+                    exULs.append(self.construct(pUL, X, Y))
                 try:
-                    self.itemset_buffer[prefix_len] = prefix_x_UL.item
+                    self.itemset_buffer[prefix_len] = X.item
                 except IndexError:
                     sys.exit(
                         f"Error: itemset_buffer_size ({self.itemset_buffer_size}) is too small"
                     )
-                self.hui_miner(X, exULs, min_utility, prefix_len + 1)
+                self.hui_miner(X, exULs, prefix_len + 1)
 
     def output(self, prefix_len: int, item: int, util: int) -> None:
         """
@@ -133,18 +125,19 @@ class AlgoHUIMiner:
         self.hui_count += 1
         line = []
         for i in range(prefix_len):
-            line.append(str(self.itemset_buffer[i]))
-        line.append(str(item))
-        line.append("#UTIL:")
-        line.append(str(util))
-        print(line)
+            line.append(self.itemset_buffer[i])
+        line.append(item)
+        u = UtilityList()
+        u.set_item(line)
+        u.sum_iutils = util
+        self.hui_result.append(u)
 
     def construct(self, P, px, py):
         pxyUL = UtilityList()
         arrLable = list(px.item) + list(py.item)
         s = set(arrLable)
         unique_l = list(s)
-        pxyUL.set_item(py.item)
+        pxyUL.set_item(unique_l)
         for ex in px.elements:
             ey = self.find_element_with_TID(py, ex.tid)
             if ey is None:
