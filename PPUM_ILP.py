@@ -332,14 +332,14 @@ if __name__ == "__main__":
     Is = [[1, 2]]
     # Is = [[1, 2], [1, 3], [1, 4]]
 
-    file_name = 'input/test.txt'
+    file_name = 'input/chess.txt'
     start = time.time()
     print("\nĐang đọc file test.txt")
     data_chess, sum_util, data_util, item_list = load_dataset_util(file_name)
     min_utility = sum(sum_util) * delta
     print("Đọc file xong. \nKhai thác hui với min utility bằng", min_utility)
 
-    hui_miner = AlgoHUIMiner(80)
+    hui_miner = AlgoHUIMiner(657918)
     hui = hui_miner.run_algorithm(data_chess, sum_util, data_util)
     print('Khai thác xong với tổng thời gian khai thác HUI (HUI Miner): %s giây' % (time.time() - start))
     print("\n-----------------\n")
