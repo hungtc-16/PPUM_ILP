@@ -328,25 +328,24 @@ def check_Is_in_HUI(HUI, Is):
 
 
 if __name__ == "__main__":
-    delta = 0.1 # 25 - 26 - 27 - 28 - 29
-
-    # chess
-    Is = [[66, 34, 5, 7, 40, 48, 52, 58, 60, 29, 62], [66, 34, 36, 5, 7, 40, 48, 52, 58, 60, 29]]
-    #mushroom
-    Is = [[59, 86],
-            [59, 85, 86],
-            [34, 36, 39, 86, 90],
-            [34, 36, 39, 85, 86, 90],
-            [24, 90, 34, 86],
-            [34, 85, 86, 24, 90],
-            [24, 34, 86]]
-    file_name = 'input/mushroom.txt'
-    start = time.time()
+   
+    chess = True
+    input = {}
+    if chess:
+        input.update({'Is': [[66, 34, 5, 7, 40, 48, 52, 58, 60, 29, 62], [66, 34, 36, 5, 7, 40, 48, 52, 58, 60, 29]]})
+        input.update({'Filename': 'input/chess_quan.txt'})
+        input.update({'Delta': 0.28}) # 25 - 26 - 27 - 28 - 29
+    else:
+        input.update({'Is':  [[59, 86], [59, 85, 86], [34, 36, 39, 86, 90], [34, 36, 39, 85, 86, 90], [24, 90, 34, 86], [34, 85, 86, 24, 90], [24, 34, 86]]})
+        input.update({'Filename': 'input/mushroom.txt'})
+        input.update({'Delta': 0.1}) # 25 - 26 - 27 - 28 - 29
+    
+    
     print("\nĐang đọc file test.txt")
-    data_chess, sum_util, data_util, item_list = load_dataset_util(file_name)
-    min_utility = sum(sum_util) * delta
+    data_chess, sum_util, data_util, item_list = load_dataset_util(input['Filename'])
+    min_utility = sum(sum_util) * input['Delta']
     print("Đọc file xong. \nKhai thác hui với min utility bằng", min_utility)
-
+    start = time.time()
     hui_miner = AlgoHUIMiner(min_utility)
     hui = hui_miner.run_algorithm(data_chess, sum_util, data_util)
 
@@ -354,14 +353,13 @@ if __name__ == "__main__":
     print("\n-----------------\n")
 
     # Kiểm tra Is có trong HUI hay không
-    if check_Is_in_HUI(hui, Is) != len(Is):
+    if check_Is_in_HUI(hui, input['Is']) != len(input['Is']):
         print("Tập Is không thuộc HUI")
-        exit()
+        exit('Tổng thời gian: %s giây' % (time.time() - start))
 
     start2 = time.time()
-
-    print("Sử dụng thuật toán PPUM_ILP để ẩn tập nhạy cảm: ", Is)
-    PPUM_ILP(hui, min_utility, data_chess, item_list, sum_util, data_util, Is).run()
+    print("Sử dụng thuật toán PPUM_ILP để ẩn tập nhạy cảm: ", input['Is'])
+    PPUM_ILP(hui, min_utility, data_chess, item_list, sum_util, data_util, input['Is']).run()
 
     print('Tổng thời gian của thuật toán PPUM_ILP: %s giây' % (time.time() - start2))
     print('Tổng thời gian: %s giây' % (time.time() - start))
