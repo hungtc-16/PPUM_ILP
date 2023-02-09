@@ -329,14 +329,14 @@ def check_Is_in_HUI(HUI, Is):
 
 if __name__ == "__main__":
    
-    chess = True
+    chess = False
     input = {}
     if chess:
         input.update({'Is': [[66, 34, 5, 7, 40, 48, 52, 58, 60, 29, 62], [66, 34, 36, 5, 7, 40, 48, 52, 58, 60, 29]]})
         input.update({'Filename': 'input/chess_quan.txt'})
-        input.update({'Delta': 0.28}) # 25 - 26 - 27 - 28 - 29
+        input.update({'Delta': 0.25}) # 25 - 26 - 27 - 28 - 29
     else:
-        input.update({'Is':  [[59, 86], [59, 85, 86], [34, 36, 39, 86, 90], [34, 36, 39, 85, 86, 90], [24, 90, 34, 86], [34, 85, 86, 24, 90], [24, 34, 86]]})
+        input.update({'Is':  [[34, 86, 39], [34, 36, 85, 86, 90, 59], [34, 39, 85, 86, 59, 93, 63]]})
         input.update({'Filename': 'input/mushroom.txt'})
         input.update({'Delta': 0.1}) # 25 - 26 - 27 - 28 - 29
     
